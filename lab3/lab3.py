@@ -41,26 +41,36 @@ def load(fname):
 
     return numpy.hstack(DList), numpy.array(labelsList, dtype=numpy.int32)
 
-def dim_reduction(D):
+# aim: dimensionality reduction of a dataset with PCA
+def PCA(D):
+# 1. compute covariance matrix
     n = numpy.shape(D)[1]
+
+    # mu = dataset mean, calculated by axis = 1 (columns mean)
+    # the result is an array of means for each column
     mu = D.mean(1)
+
+    # remove the mean from all points of the data matrix D,
+    # so I can center the data
     DC = D - mcol(mu)
 
+    #calculate covariance matrix with DataCentered matrix
     C = 1/n * numpy.dot(DC, numpy.transpose(DC))
 
+    #Calculate eigenvectors and eigenvalues of C with singular value decomposition
+    # That's why C is semi-definite positive, so we can get the sorted eigenvectors
+    # from the svd: C=U*(Sigma)*V(^transposed)
+    # svd() returns sorted eigenvalues from smallest to largest,
+    # and the corresponding eigenvectors
     USVD, s, _ = numpy.linalg.svd(C)
-    print("USVD")
-    print(USVD)
+
+    # m are the leading eigenvectors chosen from the next P matrix
     m = 2
     P = USVD[:, 0:m]
 
+    #apply the projection to the matrix of samples D
     DP = numpy.dot(P.T, D)
-    print(DP)
-    print(DP.shape)
     pylab.scatter(DP[0], DP[1])
-    print(DP[0])
-    plt.scatter(DP[0], DP[1])
-    plt.show()
     
 if __name__ == '__main__':
 
@@ -71,7 +81,6 @@ if __name__ == '__main__':
 
     D, L = load('iris.csv')
     print(numpy.shape(D))
-    dim_reduction(D)
-    #plot_hist(D, L)
+    PCA(D)
     
 
