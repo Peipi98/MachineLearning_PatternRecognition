@@ -41,6 +41,32 @@ def load(fname):
 
     return numpy.hstack(DList), numpy.array(labelsList, dtype=numpy.int32)
 
+def plot_hist(D, L):
+
+    D0 = D[:, L==0]
+    D1 = D[:, L==1]
+    D2 = D[:, L==2]
+
+    hFea = {
+        0: 'Sepal length',
+        1: 'Sepal width',
+        2: 'Petal length',
+        3: 'Petal width'
+        }
+
+    for dIdx in range(4):
+        plt.figure()
+        plt.xlabel(hFea[dIdx])
+        
+        plt.hist(D0[dIdx, :], bins = 10, density = True, alpha = 0.4, label = 'Setosa')
+        plt.hist(D1[dIdx, :], bins = 10, density = True, alpha = 0.4, label = 'Versicolor')
+        plt.hist(D2[dIdx, :], bins = 10, density = True, alpha = 0.4, label = 'Virginica')
+        
+        plt.legend()
+        plt.tight_layout() # Use with non-default font size to keep axis label inside the figure
+        plt.savefig('hist_%d.pdf' % dIdx)
+    plt.show()
+
 # aim: dimensionality reduction of a dataset with PCA
 def PCA(D):
 # 1. compute covariance matrix
@@ -71,6 +97,9 @@ def PCA(D):
     #apply the projection to the matrix of samples D
     DP = numpy.dot(P.T, D)
     pylab.scatter(DP[0], DP[1])
+    
+def LDA(D, L):
+    D[:, L==i]
     
 if __name__ == '__main__':
 
