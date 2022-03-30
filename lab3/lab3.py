@@ -73,5 +73,6 @@ if __name__ == '__main__':
     print(numpy.shape(D))
     dim_reduction(D)
     #plot_hist(D, L)
-    #plot_scatter(D, L)
+    plt.scatter(D, L)
+    
 
