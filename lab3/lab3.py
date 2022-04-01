@@ -41,37 +41,11 @@ def load(fname):
 
     return numpy.hstack(DList), numpy.array(labelsList, dtype=numpy.int32)
 
-def plot_hist(D, L):
-
-    D0 = D[:, L==0]
-    D1 = D[:, L==1]
-    D2 = D[:, L==2]
-
-    hFea = {
-        0: 'Sepal length',
-        1: 'Sepal width',
-        2: 'Petal length',
-        3: 'Petal width'
-        }
-
-    for dIdx in range(4):
-        plt.figure()
-        plt.xlabel(hFea[dIdx])
-        
-        plt.hist(D0[dIdx, :], bins = 10, density = True, alpha = 0.4, label = 'Setosa')
-        plt.hist(D1[dIdx, :], bins = 10, density = True, alpha = 0.4, label = 'Versicolor')
-        plt.hist(D2[dIdx, :], bins = 10, density = True, alpha = 0.4, label = 'Virginica')
-        
-        plt.legend()
-        plt.tight_layout() # Use with non-default font size to keep axis label inside the figure
-        plt.savefig('hist_%d.pdf' % dIdx)
-    plt.show()
-
 # aim: dimensionality reduction of a dataset with PCA
 def PCA(D):
+
 # 1. compute covariance matrix
     n = numpy.shape(D)[1]
-
     # mu = dataset mean, calculated by axis = 1 (columns mean)
     # the result is an array of means for each column
     mu = D.mean(1)
@@ -96,20 +70,77 @@ def PCA(D):
 
     #apply the projection to the matrix of samples D
     DP = numpy.dot(P.T, D)
-    pylab.scatter(DP[0], DP[1])
+    print(DP)
+    hlabels = {
+        0: "setosa",
+        1: "versicolor",
+        2: "virginica"
+    }
+
+    for i in range(3):
+#I have to invert the sign of the second eigenvector to flip the image
+        plt.scatter(DP[:, L==i][0], -DP[:, L==i][1], label = hlabels.get(i))
+        plt.legend()
+        plt.tight_layout()
+    plt.show()
     
 def LDA(D, L):
-    D[:, L==i]
-    
+    D0 = D[:, L==0]
+    D1 = D[:, L==1]
+    D2 = D[:, L==2]
+    DPn = []
+
+# To compute LDA, we have to:
+# 1. Compute matrices SB and SW
+# 2. Compute LDA directions 
+
+# ************** 1. Compute matrices SB and SW **************
+    # tot. number of samples
+    N = numpy.shape(D)[1]
+
+# compute S_{w,c}
+    tot_Swc = 0
+    muc_vec = []
+    nc_vec = []
+    for i in range(3):
+        Dtemp = D[:, L==i]
+        nc = numpy.shape(Dtemp)[1]
+        nc_vec.append(nc)
+        muc = Dtemp.mean(1)
+        muc_vec.append(muc)
+        DC = Dtemp - mcol(muc)
+# since we have to implement the sum of within covariance of all classes,
+# we have to calculate a covariance matrix step by step but with the substitution
+# of 1/nc with nc to fit in the general formula in tot_Swc 
+        C = nc * numpy.dot(DC, numpy.transpose(DC))
+        USVD, s, _ = numpy.linalg.svd(C)
+        m = 2
+        P = USVD[:, 0:m]
+        DP = numpy.dot(P.T, D)
+        DPn.append(DP)
+        tot_Swc += C * 1/nc
+    Sw = tot_Swc / N
+
+# Compute S_B
+    # compute generic mean vector
+    mu = D.mean(1)
+    tot_SB = 0
+    for i in range(3):
+        tot_SB += nc_vec[i] * mcol((muc_vec[i] - mu)).dot(mcol(muc_vec[i] - mu).T)
+
+    Sb = 1/N * tot_SB
+
+# ************** 2. Compute LDA directions **************
+
+
 if __name__ == '__main__':
 
     # Change default font size - comment to use default values
-    plt.rc('font', size=16)
+    plt.rc('font', size=10)
     plt.rc('xtick', labelsize=16)
     plt.rc('ytick', labelsize=16)
-
     D, L = load('iris.csv')
-    print(numpy.shape(D))
+    print(L)
     PCA(D)
-    
+    LDA(D,L)
 
