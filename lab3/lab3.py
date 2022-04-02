@@ -10,6 +10,7 @@ import numpy
 import matplotlib
 import matplotlib.pyplot as plt
 import pylab
+import scipy.linalg
 
 def mcol(v):
     return v.reshape((v.size, 1))
@@ -93,6 +94,7 @@ def LDA(D, L):
 # To compute LDA, we have to:
 # 1. Compute matrices SB and SW
 # 2. Compute LDA directions 
+# 3. Solving the eigenvalue problem by joint diagonalization of Sb and Sw
 
 # ************** 1. Compute matrices SB and SW **************
     # tot. number of samples
@@ -131,6 +133,47 @@ def LDA(D, L):
     Sb = 1/N * tot_SB
 
 # ************** 2. Compute LDA directions **************
+    # solve the eigenvalue problem for hermitian matrices with scipy.linalg.eigh
+    # Pay attention: numpy.linalg.eigh does not resolve this problem.
+    s, U = scipy.linalg.eigh(Sb, Sw)
+    W = U[:, ::-1][:, 0:m]
+
+    # Since W column are not necessarily orthogonal, we can find a basis U
+    # for the subspace spanned by W using the svd:
+    UW, _, _ = numpy.linalg.svd(W)
+    U = UW[:, 0:m]
+    print(U)
+# ************** 3. Solving the eigenvalue problem 
+# by joint diagonalization of Sb and Sw **************
+# We have to estimate the matrix P1 such that the within class covariance
+# of the transformed points P1x is the identity (see pdf)
+    U, s, _ = numpy.linalg.svd(Sw)
+
+    # s is the diagonal of the matrix Sigma.
+    P1 = numpy.dot(U * numpy.diag(1.0/(s**0.5)), U.T)
+
+    #now we have to calculate Sbt as follows to apply
+    # the whitening transformation as follows:
+    Sbt = numpy.dot(numpy.dot(P1,Sb), P1.T)
+
+    U, s, _ = numpy.linalg.svd(Sbt)
+    P2 = numpy.dot(U * numpy.diag(1.0/(s**0.5)), U.T)
+
+    W = numpy.dot(P1.T, P2)
+    print(numpy.shape(W))
+    hlabels = {
+        0: "setosa",
+        1: "versicolor",
+        2: "virginica"
+    }
+    for i in range(3):
+#I have to invert the sign of the second eigenvector to flip the image
+        plt.scatter(U[:, L==i][0], -U[:, L==i][1], label = hlabels.get(i))
+        plt.legend()
+        plt.tight_layout()
+    plt.show()
+    
+
 
 
 if __name__ == '__main__':
