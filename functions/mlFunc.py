@@ -3,7 +3,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import pylab
 import scipy.linalg
-
+import sklearn.datasets
 
 def mcol(v):
     return v.reshape((v.size, 1))
@@ -35,9 +35,13 @@ def load(fname):
 
     return numpy.hstack(DList), numpy.array(labelsList, dtype=numpy.int32)
     
+
+def load_iris():
+    D, L = sklearn.datasets.load_iris()['data'].T, sklearn.datasets.load_iris() ['target']
+    return D, L
+    
+    
 def mu(D):
-    print(numpy.mean(D, 1))
-    print(D.mean(1))
     return mcol(D.mean(1))
 
 def covariance(D, mu):
@@ -88,6 +92,11 @@ def PCA(D, L):
         plt.tight_layout()
     plt.show()
 
+def ML_GAU(D):
+    m = mu(D)
+    C= covariance(D, m)
+    return m, C
+
 def logpdf_GAU_ND(X, mu, C):
     P  = numpy.linalg.inv(C)
     const = -0.5 * X.shape[0] * numpy.log(2*numpy.pi)
@@ -103,6 +112,9 @@ def logpdf_GAU_ND(X, mu, C):
 
 def loglikelihood(XND, m_ML, C_ML):
     return logpdf_GAU_ND(XND, m_ML, C_ML).sum()
+
+def likelihood(XND, m_ML, C_ML):
+    return numpy.exp(loglikelihood(XND, m_ML, C_ML))
 
 def plot():
     plt.figure()
