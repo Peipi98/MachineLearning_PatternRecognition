@@ -114,13 +114,13 @@ def LDA(D, L):
 # since we have to implement the sum of within covariance of all classes,
 # we have to calculate a covariance matrix step by step but with the substitution
 # of 1/nc with nc to fit in the general formula in tot_Swc 
-        C = nc * numpy.dot(DC, numpy.transpose(DC))
+        C = numpy.dot(DC, numpy.transpose(DC))
         USVD, s, _ = numpy.linalg.svd(C)
         m = 2
         P = USVD[:, 0:m]
         DP = numpy.dot(P.T, D)
         DPn.append(DP)
-        tot_Swc += C * 1/nc
+        tot_Swc += C
     Sw = tot_Swc / N
 
 # Compute S_B
@@ -158,8 +158,11 @@ def LDA(D, L):
 
     U, s, _ = numpy.linalg.svd(Sbt)
     P2 = numpy.dot(U * numpy.diag(1.0/(s**0.5)), U.T)
+    
 
     W = numpy.dot(P1.T, P2)
+    
+    
     print(numpy.shape(W))
     hlabels = {
         0: "setosa",
