@@ -21,7 +21,7 @@ def f(x):
     return pow(x[0] + 3, 2) + np.sin(x[0]) + pow(x[1] + 1, 2)
 
 def f_2(x):
-    y,z = x;
+    y,z = x
     
     obj = pow(x[0] + 3, 2) + np.sin(x[0]) + pow(x[1] + 1, 2)
     grad = np.array([2*(y+3) + np.cos(y), 2*(z+1)])
@@ -35,7 +35,7 @@ def load_iris_binary():
     L[L==2] = 0 # We assign label 0 to virginica (was label 2) 
     return D, L
 
-def logreg_obj_wrap(DTR, LTR, 1):
+def logreg_obj_wrap(DTR, LTR):
     Z = LTR * 2.0 - 1.0
     M = DTR.shape[0]
     def logreg_obj(v):
