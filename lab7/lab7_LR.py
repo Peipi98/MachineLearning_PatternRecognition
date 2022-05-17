@@ -14,7 +14,7 @@ import scipy
 import scipy.optimize as opt
 import sklearn.datasets
 import sys
-sys.path.append("/Users/peipi98/Documents/PoliTO/Materie/Machine Learning/labs/MachineLearning_PatternRecognition/functions")
+sys.path.append("../functions")
 from mlFunc import *
 
 def f(x):
@@ -35,14 +35,13 @@ def load_iris_binary():
     L[L==2] = 0 # We assign label 0 to virginica (was label 2) 
     return D, L
 
-def logreg_obj_wrap(DTR, LTR):
+def logreg_obj_wrap(DTR, LTR, l):
     Z = LTR * 2.0 - 1.0
     M = DTR.shape[0]
     def logreg_obj(v):
-        w, b = v[0:M], v[-1]
+        w, b = mcol(v[0:M]), v[-1]
         S = np.dot(w.T, DTR) + b
-        cxe = np.logaddexp(, -S*Z).mean()
-        
+        cxe = np.logaddexp(0, -S*Z).mean()
         return cxe + 0.5*l * np.linalg.norm(w)**2
     return logreg_obj
 
@@ -54,6 +53,15 @@ if __name__ == "__main__":
     
     D, L = load_iris_binary()
     (DTR, LTR), (DTE, LTE) = split_db_2to1(D, L)
+    
+    for lamb in [1e-6, 1e-3, 0.1, 1.0]:
+        logreg_obj = logreg_obj_wrap(DTR, LTR, lamb)
+        _v, _J, _d = scipy.optimize.fmin_l_bfgs_b(logreg_obj, numpy.zeros(DTR.shape[0]+1), approx_grad=True )
+        _w = _v[0:DTR.shape[0]]
+        _b = _v[-1]
+        STE = numpy.dot(_w.T, DTE) + _b
+        LP = STE > 0
+        print(lamb, _J, LP)
     
     
     
