@@ -126,11 +126,11 @@ def logpdf_GAU_ND(X, mu, C):
         Y.append(res)
     return numpy.array(Y).ravel()
 
-def loglikelihood(XND, m_ML, C_ML):
-    return logpdf_GAU_ND(XND, m_ML, C_ML).sum()
+def loglikelihood(D, m_ML, C_ML):
+    return logpdf_GAU_ND(D, m_ML, C_ML).sum()
 
-def likelihood(XND, m_ML, C_ML):
-    return numpy.exp(loglikelihood(XND, m_ML, C_ML))
+def likelihood(D, m_ML, C_ML):
+    return numpy.exp(loglikelihood(D, m_ML, C_ML))
 
 def plot():
     plt.figure()
@@ -146,3 +146,17 @@ def plot_hist_exp(X1D, m_ML, C_ML):
     XPlot = numpy.linspace(-8, 12, 1000)
     plt.plot(XPlot.ravel(), numpy.exp(logpdf_GAU_ND(mrow(XPlot), m_ML, C_ML)))
     plt.show()
+
+def split_db_2to1(D, L, seed=0):
+    nTrain = int(D.shape[1]*2.0/3.0)
+    numpy.random.seed(seed)
+    idx = numpy.random.permutation(D.shape[1])
+    idxTrain = idx[0:nTrain]
+    idxTest = idx[nTrain:]
+    
+    DTR = D[:, idxTrain]
+    DTE = D[:, idxTest]
+    LTR = L[idxTrain]
+    LTE = L[idxTest]
+    
+    return (DTR, LTR), (DTE, LTE)

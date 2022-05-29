@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import pylab
 import scipy
 import sys
-sys.path.append("/Users/peipi98/Documents/PoliTO/Materie/Machine Learning/labs/MachineLearning_PatternRecognition/functions")
+sys.path.append("./functions")
 from mlFunc import *
 
 def split_db_2to1(D, L, seed=0):
