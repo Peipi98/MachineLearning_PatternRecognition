@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from cmath import log
+from ctypes.wintypes import LPRECT
 import numpy
 import matplotlib
 import matplotlib.pyplot as plt
@@ -73,6 +74,7 @@ def evaluate_MVG(D, L):
     
     accuracy_2 = (LTE == LPred2).sum() /LTE.size
     error_2 = 1 - accuracy_2
+    return LPred1, LPred2
 
 def evaluate_tied_GC(D, L):
     (DTR, LTR), (DTE, LTE) = split_db_2to1(D, L)
@@ -124,6 +126,8 @@ def evaluate_tied_GC(D, L):
 if __name__ == "__main__":
     D, L = load_iris()
     
-    #evaluate_MVG(D, L)
+    LPred1, LPred2 = evaluate_MVG(D, L)
+    print(LPred1)
+    print(LPred2)
     #evaluate_tied_GC(D, L)
     print(kfold_cross(D, L, 3))
