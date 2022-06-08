@@ -29,7 +29,20 @@ def opt_bayes(pi, Cfn, Cfp):
     C = numpy.matrix([[0,Cfn],[Cfp,0]])
     t = threshold(C, pi)
     LPred = llr > t
-    confusion(labels, LPred, 2, f"π={pi} - Cfn={Cfn}, Cfp={Cfp}", ["", "0", "1"])
+    return confusion(labels, LPred, 2, f"π={pi} - Cfn={Cfn}, Cfp={Cfp}", ["", "0", "1"])
+
+def DCF(M, pi, cfn, cfp):
+    FNR = M[0,1] / (M[1,1]+M[0,1])
+    FPR = M[1,0] /(M[0,0] + M[1,0])
+
+    sum = pi * cfn * FNR + (1-pi) * cfp * FPR
+
+    return format(sum, ".3f")
+
+def norm_DCF(M, pi, cfn, cfp):
+    FNR = M[0,1] / (M[1,1]+M[0,1])
+    FPR = M[1,0] /(M[0,0] + M[1,0])  
+    return format(min((pi * cfn ), (1-pi) * cfp  ), ".3f")
 
 if __name__ == '__main__':
     D, L = load_iris()
@@ -48,7 +61,37 @@ if __name__ == '__main__':
     # =========== Optimal Bayes Decision ===========
     print("\n=========== Optimal Bayes Decision ===========\n")
 
-    opt_bayes(0.5, 1, 1)
-    opt_bayes(0.8, 1, 1)
-    opt_bayes(0.5, 10, 1)
-    opt_bayes(0.8, 1, 10)
+    m1 = opt_bayes(0.5, 1, 1)
+    m2 = opt_bayes(0.8, 1, 1)
+    m3 = opt_bayes(0.5, 10, 1)
+    m4 = opt_bayes(0.8, 1, 10)
+
+    # =========== Evaluation ===========
+    print("\n=========== Evaluation ===========\n")
+    t = PrettyTable(["π, Cfn, Cfp", "DCF"])
+    t.title = "Evaluation"
+
+    dcf1 = DCF(m1, 0.5, 1, 1)
+    dcf2 = DCF(m2, 0.8, 1, 1)
+    dcf3 = DCF(m3, 0.5, 10, 1)
+    dcf4 = DCF(m4, 0.8, 1, 10)
+    t.add_row([(0.5, 1, 1), dcf1])
+    t.add_row([(0.8, 1, 1), dcf2])
+    t.add_row([(0.5, 10, 1), dcf3])
+    t.add_row([(0.8, 1, 10), dcf4])
+    print(t)
+    
+    t = PrettyTable(["π, Cfn, Cfp", "norm. DCF"])
+    t.title = "Evaluation"
+
+    dcf1 = norm_DCF(m1, 0.5, 1, 1)
+    dcf2 = norm_DCF(m2, 0.8, 1, 1)
+    dcf3 = norm_DCF(m3, 0.5, 10, 1)
+    dcf4 = norm_DCF(m4, 0.8, 1, 10)
+    t.add_row([(0.5, 1, 1), dcf1])
+    t.add_row([(0.8, 1, 1), dcf2])
+    t.add_row([(0.5, 10, 1), dcf3])
+    t.add_row([(0.8, 1, 10), dcf4])
+    print(t)
+    # =========== Minimum detection costs ===========
+    print("\n=========== Minimum detection costs ===========\n")
