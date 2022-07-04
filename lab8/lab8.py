@@ -24,7 +24,7 @@ def threshold(C, pi):
     t = -(numpy.log(pi * C[0, 1]) - numpy.log((1-pi)*C[1, 0]))
     return t
 
-def opt_bayes(pi, Cfn, Cfp):
+def opt_bayes(pi, Cfn, Cfp, llr):
     pi = pi
     C = numpy.matrix([[0,Cfn],[Cfp,0]])
     t = threshold(C, pi)
@@ -41,8 +41,13 @@ def DCF(M, pi, cfn, cfp):
 
 def norm_DCF(M, pi, cfn, cfp):
     FNR = M[0,1] / (M[1,1]+M[0,1])
-    FPR = M[1,0] /(M[0,0] + M[1,0])  
-    return format(min((pi * cfn ), (1-pi) * cfp  ), ".3f")
+    FPR = M[1,0] /(M[0,0] + M[1,0]) 
+    
+    sum = pi * cfn * FNR + (1-pi) * cfp * FPR
+    
+    bayes_risk_no_test = min(pi * cfn, (1-pi) * cfp)
+    
+    return format(sum / bayes_risk_no_test , ".3f")
 
 if __name__ == '__main__':
     D, L = load_iris()
@@ -61,10 +66,10 @@ if __name__ == '__main__':
     # =========== Optimal Bayes Decision ===========
     print("\n=========== Optimal Bayes Decision ===========\n")
 
-    m1 = opt_bayes(0.5, 1, 1)
-    m2 = opt_bayes(0.8, 1, 1)
-    m3 = opt_bayes(0.5, 10, 1)
-    m4 = opt_bayes(0.8, 1, 10)
+    m1 = opt_bayes(0.5, 1, 1, llr)
+    m2 = opt_bayes(0.8, 1, 1, llr)
+    m3 = opt_bayes(0.5, 10, 1, llr)
+    m4 = opt_bayes(0.8, 1, 10, llr)
 
     # =========== Evaluation ===========
     print("\n=========== Evaluation ===========\n")
@@ -81,8 +86,10 @@ if __name__ == '__main__':
     t.add_row([(0.8, 1, 10), dcf4])
     print(t)
     
+    # =========== Norm DCF ===========
+    print("\n=========== Norm DCF ===========\n")
     t = PrettyTable(["π, Cfn, Cfp", "norm. DCF"])
-    t.title = "Evaluation"
+    t.title = "Norm DCF"
 
     dcf1 = norm_DCF(m1, 0.5, 1, 1)
     dcf2 = norm_DCF(m2, 0.8, 1, 1)
@@ -93,5 +100,11 @@ if __name__ == '__main__':
     t.add_row([(0.5, 10, 1), dcf3])
     t.add_row([(0.8, 1, 10), dcf4])
     print(t)
+
     # =========== Minimum detection costs ===========
     print("\n=========== Minimum detection costs ===========\n")
+    t = PrettyTable(["π, Cfn, Cfp", "DCF"])
+    t.title = "min DCF"
+
+    
+    
